@@ -32,3 +32,9 @@ test_clean_path:
 - data/output/X_test_clean.pkl
 - data/output/y_test_clean.pkl
 
+# Modeling related
+list_of_model_path: log/list_of_model.pkl
+list_of_param_path: log/list_of_param.pkl
+list_of_tuned_model_path: log/list_of_tuned_model.pkl
+best_model_path: models/best_model.pkl
+best_threshold_path: models/best_threshold.pkl

@@ -150,44 +150,6 @@ def get_best_model(return_file=True):
     if return_file:
         return best_model
 
-def get_best_threshold(return_file=True):
-    """Function to tune & get the best decision threshold"""
-    # Load data & model
-    X_valid = utils.pickle_load(CONFIG_DATA['valid_clean_path'][0])
-    y_valid = utils.pickle_load(CONFIG_DATA['valid_clean_path'][1])
-    best_model = utils.pickle_load(CONFIG_DATA['best_model_path'])
-
-    # Get the proba pred
-    y_pred_proba = best_model.predict_proba(X_valid)[:, 1]
-
-    # Initialize
-    metric_threshold = pd.Series([])
-    
-    # Optimize
-    for threshold_value in THRESHOLD:
-        # Get predictions
-        y_pred = (y_pred_proba >= threshold_value).astype(int)
-
-        # Get the F1 score
-        metric_score = f1_score(y_valid, y_pred, average='macro')
-
-        # Add to the storage
-        metric_threshold[metric_score] = threshold_value
-
-    # Find the threshold @max metric score
-    metric_score_max_index = metric_threshold.index.max()
-    best_threshold = metric_threshold[metric_score_max_index]
-    print('=============================================')
-    print('Best threshold :', best_threshold)
-    print('Metric score   :', metric_score_max_index)
-    print('=============================================')
-    
-    # Dump file
-    utils.pickle_dump(best_threshold, CONFIG_DATA['best_threshold_path'])
-
-    if return_file:
-        return best_threshold
-
 
 if __name__ == '__main__':
     # 1. Load configuration file & Set Threshold
@@ -199,6 +161,3 @@ if __name__ == '__main__':
 
     # 3. Get the best model
     get_best_model()
-
-    # 4. Get the best threshold for the best model
-    get_best_threshold()

@@ -4,12 +4,12 @@ import utils as utils
 from sklearn.model_selection import train_test_split
 
 
-def read_data(return_file=False):
+def read_data(return_file=True):
     # Read data
     data = pd.read_csv(CONFIG_DATA['raw_dataset_path'], 
                        sep=',',
-                       index_col=CONFIG_DATA['index_column'])
-
+                    #    index_col=CONFIG_DATA['index_column'])
+    )
     # Print data
     print('data shape   :', data.shape)
 
