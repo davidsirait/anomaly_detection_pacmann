@@ -9,41 +9,23 @@ import uvicorn
 # Load config data
 CONFIG_DATA = utils.config_load()
 
-def transform_imputer(data, constant_imputer, median_imputer):
-    """Function to transform imputer"""
-    data = data.copy()
-
-    # Transform
-    impute_constant = constant_imputer.transform(data[[CONFIG_DATA['constant_imputer_col']]])
-    impute_median = median_imputer.transform(data[[CONFIG_DATA['median_imputer_col']]])
-
-    # Join transformed data
-    data[CONFIG_DATA['constant_imputer_col']] = impute_constant
-    data[CONFIG_DATA['median_imputer_col']] = impute_median
-
-    return data
-
-def transform_standardize(data, standardizer):
+def transform_standardize(data, standardizer, columns=['Time', 'Amount']):
     """Function to standardize data"""
-    data_standard = pd.DataFrame(standardizer.transform(data))
-    data_standard.columns = data.columns
+    data_standard = pd.DataFrame(standardizer.transform(data[columns]))
     data_standard.index = data.index
-    return data_standard
+    data[columns] = data_standard
+    return data
 
 class Model:
     def __init__(self):
         """Initialize preprocessor, model, & threshold"""
         self.preprocessor = utils.pickle_load(CONFIG_DATA['preprocessor_path'])
-        self.model = utils.pickle_load(CONFIG_DATA['best_model_path'])
-        self.threshold = utils.pickle_load(CONFIG_DATA['best_threshold_path'])
+        self.model = utils.pickle_load(CONFIG_DATA['best_model_path'])    
 
     def preprocess(self, X):
         """Function to preprocess data"""
         X = X.copy()
-        X_imputed = transform_imputer(data = X,
-                                      constant_imputer = self.preprocessor['constant_imputer'],
-                                      median_imputer = self.preprocessor['median_imputer'])
-        X_clean = transform_standardize(data = X_imputed,
+        X_clean = transform_standardize(data = X,
                                         standardizer = self.preprocessor['standardizer'])
         
         return X_clean
@@ -54,8 +36,7 @@ class Model:
         X_clean = self.preprocess(X)
 
         # Predict data
-        y_pred_proba = self.model.predict_proba(X_clean)[:, 1]
-        y_pred = y_pred_proba >= self.threshold
+        y_pred = self.model.predict(X_clean)
 
         # Predict dictionary
         y_pred_dict = {'label': [int(i) for i in y_pred]}
